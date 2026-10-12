@@ -91,3 +91,5 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler", "filters": ["redact"]}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+LOGIN_URL = "/"
