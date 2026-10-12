@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from django.test import TestCase
+from django.contrib.auth.hashers import identify_hasher
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from .models import Account, Role
@@ -36,6 +37,42 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertRedirects(response, reverse("dashboard"))
         self.assertEqual(str(self.client.session["_auth_user_id"]), str(self.admin.pk))
         self.assertEqual(self.client.session["role_code"], Role.Code.ADMIN)
+
+    def test_password_uses_argon2_and_is_never_stored_in_plain_text(self) -> None:
+        self.assertNotIn(self.password, self.admin.password)
+        self.assertEqual(identify_hasher(self.admin.password).algorithm, "argon2")
+
+    def test_login_post_requires_csrf_and_sets_protected_cookies(self) -> None:
+        csrf_client = Client(enforce_csrf_checks=True)
+        rejected = csrf_client.post(
+            reverse("login"), {"email": self.admin.email, "password": self.password}
+        )
+        self.assertEqual(rejected.status_code, 403)
+        self.assertNotIn("_auth_user_id", csrf_client.session)
+
+        form_response = csrf_client.get(reverse("login"))
+        csrf_cookie = form_response.cookies["csrftoken"]
+        accepted = csrf_client.post(
+            reverse("login"),
+            {
+                "email": self.admin.email,
+                "password": self.password,
+                "csrfmiddlewaretoken": csrf_cookie.value,
+            },
+        )
+
+        self.assertRedirects(accepted, reverse("dashboard"))
+        self.assertTrue(csrf_cookie["httponly"])
+        self.assertEqual(csrf_cookie["samesite"], "Lax")
+        self.assertTrue(accepted.cookies["sessionid"]["httponly"])
+        self.assertEqual(accepted.cookies["sessionid"]["samesite"], "Lax")
+
+    def test_invalid_email_is_rejected_before_authentication(self) -> None:
+        response = self.login("not-an-email")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Introduzca una dirección de correo electrónico válida")
+        self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_unknown_email_wrong_password_and_inactive_account_share_message(self) -> None:
         cases = [
@@ -88,4 +125,3 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
         response = self.client.get(reverse("sales-counter"))
         self.assertEqual(response.status_code, 302)
-
