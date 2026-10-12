@@ -1,0 +1,11 @@
+{% extends "identity/base.html" %}
+{% block content %}
+  <h2>Inicio</h2>
+  {% if user.role.code == 'ADMIN' %}<a href="{% url 'product-entry' %}">Registrar producto</a>{% endif %}
+  {% if user.role.code == 'ALMACENERO' %}<a href="{% url 'inventory-load' %}">Carga inicial</a>{% endif %}
+  {% if user.role.code == 'VENDEDOR' %}
+    <a href="{% url 'cash-open' %}">Abrir turno</a>
+    <a href="{% url 'sales-counter' %}">Ventas</a>
+  {% endif %}
+{% endblock %}
+
