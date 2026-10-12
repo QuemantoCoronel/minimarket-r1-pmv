@@ -16,7 +16,7 @@ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'migrator_user') \gexe
 SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'app_user', :'app_password')
 WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'app_user') \gexec
 
--- El rol de la aplicaciÃ³n no debe heredar acceso pÃºblico ni crear objetos.
+-- El rol de la aplicaciÃƒÂ³n no debe heredar acceso pÃƒÂºblico ni crear objetos.
 SELECT format('REVOKE ALL ON DATABASE %I FROM PUBLIC', current_database()) \gexec
 SELECT format('REVOKE CREATE ON SCHEMA public FROM PUBLIC') \gexec
 
