@@ -4,9 +4,8 @@
   <form method="post" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}
-    <p>{{ form.email.label_tag }} {{ form.email }}</p>
-    <p>{{ form.password.label_tag }} {{ form.password }}</p>
+    <p>{{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}</p>
+    <p>{{ form.password.label_tag }} {{ form.password }} {{ form.password.errors }}</p>
     <button type="submit">Ingresar</button>
   </form>
 {% endblock %}
-
