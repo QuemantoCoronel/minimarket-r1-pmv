@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.venv
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+evidencias/
+node_modules/
