@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel {{ user_role }} — Minimarket R1-PMV</title>
+  <style>
+    :root {
+      --header-bg: #0f172a;
+      --header-text: #f8fafc;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background-color: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+    .user-badge {
+      background: #1e293b;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      border: 1px solid #334155;
+    }
+    nav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    nav a, .btn-logout {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    nav a:hover, nav a:focus-visible {
+      background: #eff6ff;
+      color: var(--accent);
+      outline: 2px solid var(--accent);
+    }
+    .btn-logout {
+      margin-left: auto;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      cursor: pointer;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .role-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <div class="brand">Minimarket R1-PMV</div>
+    <div class="user-badge" data-testid="active-user-info">
+      Usuario: <strong>{{ user_email }}</strong> | Rol: <strong data-testid="active-role-badge">{{ user_role }}</strong>
+    </div>
+  </header>
+
+  <nav aria-label="Navegación principal por rol" data-testid="role-navigation">
+    {% if user_role == 'ADMIN' %}
+      <a href="/productos/nuevo/" data-testid="nav-admin-registrar-producto">Registrar producto enlatado</a>
+      <a href="/productos/" data-testid="nav-admin-catalogo">Catálogo de productos</a>
+    {% elif user_role == 'ALMACENERO' %}
+      <a href="/inventario/carga-inicial/" data-testid="nav-almacenero-carga-inicial">Carga inicial por lotes</a>
+      <a href="/inventario/lotes/" data-testid="nav-almacenero-lotes">Consulta de lotes</a>
+    {% elif user_role == 'VENDEDOR' %}
+      <a href="/caja/apertura/" data-testid="nav-vendedor-abrir-caja">Abrir turno de caja</a>
+      <a href="/ventas/preparar/" data-testid="nav-vendedor-preparar-venta">Preparar venta</a>
+      <a href="/ventas/ultima-constancia/" data-testid="nav-vendedor-ultima-constancia">Última constancia</a>
+      <a href="/caja/cierre/" data-testid="nav-vendedor-cerrar-caja">Cerrar y cuadrar caja</a>
+    {% endif %}
+
+    <form method="post" action="/auth/logout/" style="margin-left:auto;">
+      {% csrf_token %}
+      <button type="submit" class="btn-logout" data-testid="logout-button">Salir</button>
+    </form>
+  </nav>
+
+  <main role="main">
+    {% if user_role == 'ADMIN' %}
+      <section class="role-panel" data-testid="area-admin">
+        <h1>Área de Administración</h1>
+        <p>Acceso autorizado exclusivamente para el rol <strong>ADMIN</strong> (Gestión de catálogo y alta de productos enlatados).</p>
+      </section>
+    {% elif user_role == 'ALMACENERO' %}
+      <section class="role-panel" data-testid="area-almacenero">
+        <h1>Área de Almacén</h1>
+        <p>Acceso autorizado exclusivamente para el rol <strong>ALMACENERO</strong> (Recepción y carga inicial por lotes).</p>
+      </section>
+    {% elif user_role == 'VENDEDOR' %}
+      <section class="role-panel" data-testid="area-vendedor">
+        <h1>Área de Punto de Venta y Caja</h1>
+        <p>Acceso autorizado exclusivamente para el rol <strong>VENDEDOR</strong> (Apertura/cierre de turno, preparación de venta, cobro y constancias).</p>
+      </section>
+    {% endif %}
+  </main>
+</body>
+</html>
