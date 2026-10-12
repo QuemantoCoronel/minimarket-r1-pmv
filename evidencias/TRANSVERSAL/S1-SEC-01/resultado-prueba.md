@@ -45,9 +45,27 @@ También pasó:
 System check identified no issues (0 silenced).
 ```
 
+### Revalidación local — 2026-10-12 14:07 (America/Lima)
+
+Se ejecutó nuevamente, con `APP_ENV=test` y una clave efímera de auditoría:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py check
+```
+
+Resultado real: `Ran 13 tests ... OK`; el chequeo de Django no reportó problemas.
+Durante las pruebas aparecen respuestas `403` esperadas de los casos de autorización;
+la suite terminó correctamente. También se verificó que `.env` no existe en el espacio
+de trabajo y permanece ignorado por Git.
+
 ## Pendiente / bloqueo
 
-Docker y PostgreSQL 17 no están instalados en el equipo. Por tanto, **no se ejecutó** Compose ni se verificaron roles/permisos efectivos contra un servidor PostgreSQL. Falta esa evidencia antes de cerrar la subtarea.
+Docker y PostgreSQL 17 no están instalados en el equipo. En la revalidación de
+2026-10-12 14:07 (America/Lima), `docker --version` y `docker compose version`
+no pudieron ejecutarse porque el comando `docker` no está disponible. Por tanto,
+**no se ejecutó** Compose ni se verificaron roles/permisos efectivos contra un
+servidor PostgreSQL. Falta esa evidencia antes de cerrar la subtarea.
 
 ## Contrato de integración
 
