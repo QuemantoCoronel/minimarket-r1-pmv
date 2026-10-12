@@ -1,0 +1,20 @@
+﻿{% extends "identity/base.html" %}
+{% block title %}Inicio ({{ user.role.code }}) — R1-PMV{% endblock %}
+{% block content %}
+  <h2 id="dashboard-heading">Panel de Inicio — Rol {{ user.role.code }}</h2>
+  <p>Seleccione una operación autorizada para su perfil:</p>
+  <nav id="role-navigation" class="role-nav" aria-label="Operaciones autorizadas por rol" data-active-role="{{ user.role.code }}">
+    <ul>
+      {% if user.role.code == 'ADMIN' %}
+        <li><a id="nav-admin-product-entry" data-nav-role="ADMIN" href="{% url 'product-entry' %}">Registrar producto</a></li>
+      {% endif %}
+      {% if user.role.code == 'ALMACENERO' %}
+        <li><a id="nav-warehouse-inventory-load" data-nav-role="ALMACENERO" href="{% url 'inventory-load' %}">Carga inicial</a></li>
+      {% endif %}
+      {% if user.role.code == 'VENDEDOR' %}
+        <li><a id="nav-seller-cash-open" data-nav-role="VENDEDOR" href="{% url 'cash-open' %}">Abrir turno</a></li>
+        <li><a id="nav-seller-sales-counter" data-nav-role="VENDEDOR" href="{% url 'sales-counter' %}">Ventas</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endblock %}
