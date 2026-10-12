@@ -1,4 +1,4 @@
-# Dictamen de Revisión y Evidencia de Ejecución — `S1-PROD02-REV` (`SCRUM-316` · `HU-PROD-02`)
+# Dictamen de Revisión y Evidencia de Ejecución — `S1-PROD02-REV` (`SCRUM-320` · `HU-PROD-02`)
 
 - **Responsable de Revisión:** D6 — Jhonny Angeles
 - **Fecha/Hora (America/Lima):** 2026-10-10 23:05
