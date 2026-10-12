@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from django.contrib.auth.hashers import identify_hasher
 from django.test import Client, TestCase
@@ -20,7 +20,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
             "admin@test.invalid", cls.password, display_name="Admin", role=cls.admin_role
         )
         cls.warehouse = Account.objects.create_user(
-            "warehouse@test.invalid", cls.password, display_name="Almacén", role=cls.warehouse_role
+            "warehouse@test.invalid", cls.password, display_name="AlmacÃ©n", role=cls.warehouse_role
         )
         cls.seller = Account.objects.create_user(
             "seller@test.invalid", cls.password, display_name="Vendedor", role=cls.seller_role
@@ -71,7 +71,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
         response = self.login("not-an-email")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Introduzca una dirección de correo electrónico válida")
+        self.assertContains(response, "Introduzca una direcciÃ³n de correo electrÃ³nico vÃ¡lida")
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_unknown_email_wrong_password_and_inactive_account_share_message(self) -> None:
@@ -144,14 +144,14 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="login-error-alert"')
         self.assertContains(response, 'role="alert"')
-        self.assertContains(response, "Correo o contraseña incorrectos")
+        self.assertContains(response, "Correo o contraseÃ±a incorrectos")
         self.assertNotContains(response, "wrong-password")
         self.assertNotContains(response, "argon2")
 
     def test_admin_navigation_exposes_only_admin_links_and_role_attributes(self):
         self.client.post(
             reverse("login"),
-            {"email": "admin.demo@pmv.invalid", "password": self.passwords["admin.demo@pmv.invalid"]},
+            {"email": "admin.demo@pmv.invalid", "password": self.password},
         )
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="ADMIN"')
@@ -163,7 +163,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
     def test_almacenero_navigation_exposes_only_warehouse_links(self):
         self.client.post(
             reverse("login"),
-            {"email": "almacen.demo@pmv.invalid", "password": self.passwords["almacen.demo@pmv.invalid"]},
+            {"email": "almacen.demo@pmv.invalid", "password": self.password},
         )
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="ALMACENERO"')
@@ -175,7 +175,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
     def test_vendedor_navigation_exposes_only_cash_and_sales_links(self):
         self.client.post(
             reverse("login"),
-            {"email": "ventas.demo@pmv.invalid", "password": self.passwords["ventas.demo@pmv.invalid"]},
+            {"email": "ventas.demo@pmv.invalid", "password": self.password},
         )
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="VENDEDOR"')
