@@ -1,32 +1,22 @@
-# Evidencia de Ejecución — `S1-PLAT-01` (`SCRUM-290`)
+﻿# Resultado de Prueba y Consolidación — `S1-PLAT-01` (`SCRUM-290`)
 
-- **Responsable:** D6 — Jhonny Angeles
-- **Fecha/Hora (America/Lima):** 2026-10-10 22:03
-- **Estado actual:** `VALIDADO EN LOCAL / BLOQUEADO EN REMOTO` (Entorno Docker Compose levantado y verificado desde limpio; pendiente enlace al repositorio remoto de GitHub y fusión con `S1-ARQ-01`).
+- **Responsable:** Jhonny Luis Angeles Pérez (`D6`)
+- **Revisor:** Favio Adriano Velasquez Revilla (`D1`)
+- **Rama:** `chore/SCRUM-290-integrar-base-django` (creada desde `origin/main`)
+- **Estado:** **VALIDADO (OK)**
 
-## 1. Archivos Creados / Modificados
-- `Dockerfile`: Imagen base `python:3.12-slim` con `tzdata` (`America/Lima`), `libpq-dev` y `postgresql-client`.
-- `.dockerignore`: Exclusión de `.env`, caché, entorno virtual y artefactos locales.
-- `docker-compose.yml`: Servicios `db` (`postgres:17-alpine` con `healthcheck` activo) y `web` (espera activa a `manage.py` de `S1-ARQ-01` y ejecución automática de migraciones).
-- `.env.example`: Plantilla de configuración externalizada sin secretos.
-- `.github/pull_request_template.md`: Plantilla de PR y checklist de revisión alineado con CA/RN/NFR.
-- `docs/plataforma/GUIA_ARRANQUE_Y_RAMAS.md`: Guía de arranque limpio, comandos coordinados con CI/migraciones y reglas de ramas protegidas.
+## 1. Preflight y Consolidación
+- `origin`: `https://github.com/QuemantoCoronel/minimarket-r1-pmv.git`
+- Docker Engine `29.7.2` y Docker Compose `v5.5.1`.
+- Se conservó íntegramente el historial de `origin/main` (sin `force push`) e integró la base Django real (`app_platform`, `identity`, `catalog`, `cash`, `config`, `manage.py`).
+- Se unificó la configuración en `compose.yaml`, `Dockerfile`, `.env.example` y el runner oficial `python manage.py test`.
+- Se agregó `.gitattributes` (`*.sh text eol=lf`) y se normalizó `db/init/01-create-runtime-roles.sh` a `LF` para garantizar compatibilidad en entornos Windows/Docker.
+- Se retiraron de la raíz los prototipos aislados (`docker-compose.yml`, `templates/` y `tests/` simulados).
 
-## 2. Contrato Entregado a `D3` (CI) y `D4` (Entorno)
-- **Variables requeridas (`.env.example`):** `TZ=America/Lima`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST=db`, `POSTGRES_PORT=5432`, `DATABASE_URL`.
-- **Servicios levantados:** `db` (`postgres:17-alpine`, puerto `5432`) y `web` (`python:3.12-slim`, puerto `8000`).
-
-## 3. Pruebas Ejecutadas y Resultado Real (Consola Local)
-
-Salida real obtenida al construir y verificar contenedores:
-```text
-NAME                       IMAGE                   COMMAND                  SERVICE   STATUS                    PORTS
-r1-pmv-d6-angeles-db-1     postgres:17-alpine      "docker-entrypoint.s…"   db        Up (healthy)              0.0.0.0:5432->5432/tcp
-r1-pmv-d6-angeles-web-1    r1-pmv-d6-angeles-web   "sh -c 'if [ -f mana…"   web       Up                        0.0.0.0:8000->8000/tcp
-
-Python 3.12.15
-
-   TimeZone   
---------------
- America/Lima
-(1 row)
+## 2. Verificación Ejecutada en Docker y PostgreSQL 17
+1. **Chequeo de sistema (`python manage.py check`):**
+   `System check identified no issues (0 silenced).`
+2. **Migraciones y Semillas en PostgreSQL 17 (`migrate` + `seed_pmv`):**
+   Todas las migraciones aplicadas (`OK`) y datos base asegurados (`PMV baseline data ensured: 3 roles, 4 fictional accounts, 1 category, 1 cash register`).
+3. **Suite oficial de pruebas (`python manage.py test -v 2`):**
+   `Ran 13 tests — OK` (verificado tanto en memoria como contra PostgreSQL 17 real).
