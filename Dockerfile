@@ -1,30 +1,18 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
-# Evitar archivos .pyc y habilitar logs en tiempo real
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    TZ=America/Lima
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --requirement requirements.txt
+COPY . ./
 
-# Instalar dependencias del sistema para PostgreSQL (psycopg) y zona horaria
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tzdata \
-    libpq-dev \
-    postgresql-client \
-    gcc \
-    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
-    && rm -rf /var/lib/apt/lists/*
-
-# Instalar dependencias de Python (soporta requirements.txt del repo real)
-COPY requirements*.txt ./
-RUN pip install --no-cache-dir --upgrade pip && \
-    if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi && \
-    if [ -f requirements-dev.txt ]; then pip install --no-cache-dir -r requirements-dev.txt; fi
-
-# Copiar el código del proyecto
-COPY . /app/
+RUN useradd --create-home --uid 10001 pmv \
+    && chown -R pmv:pmv /app
+USER pmv
 
 EXPOSE 8000
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
