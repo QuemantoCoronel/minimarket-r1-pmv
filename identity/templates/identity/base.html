@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>R1-PMV</title>
+</head>
+<body>
+  <header>
+    <h1>R1-PMV</h1>
+    {% if user.is_authenticated %}
+      <p>Sesión de {{ user.display_name }} · {{ user.role.code }}</p>
+      <a href="{% url 'logout' %}">Salir</a>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
+
