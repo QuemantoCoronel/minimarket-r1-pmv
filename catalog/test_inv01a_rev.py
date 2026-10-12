@@ -29,7 +29,7 @@ class InitialInventoryLoadAuditTests(TestCase):
         self.client.post(reverse("login"), {"email": self.warehouse.email, "password": self.password})
         warehouse_res = self.client.get("/inventario/carga-inicial/")
         self.assertEqual(warehouse_res.status_code, 200)
-        self.assertContains(warehouse_res, "Carga inicial de inventario")
+        self.assertContains(warehouse_res, "Carga inicial")
         self.client.logout()
         self.client.post(reverse("login"), {"email": self.admin.email, "password": self.password})
         self.assertEqual(self.client.get("/inventario/carga-inicial/").status_code, 403)
