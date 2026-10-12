@@ -1,0 +1,10 @@
+{% extends "identity/base.html" %}
+{% block content %}
+  <h2>¿Deseas salir?</h2>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar salida</button>
+    <a href="{% url 'dashboard' %}">Cancelar</a>
+  </form>
+{% endblock %}
+
