@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from django.contrib.auth.hashers import identify_hasher
 from django.test import Client, TestCase
@@ -20,7 +20,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
             "admin@test.invalid", cls.password, display_name="Admin", role=cls.admin_role
         )
         cls.warehouse = Account.objects.create_user(
-            "warehouse@test.invalid", cls.password, display_name="AlmacÃ©n", role=cls.warehouse_role
+            "warehouse@test.invalid", cls.password, display_name="Almacén", role=cls.warehouse_role
         )
         cls.seller = Account.objects.create_user(
             "seller@test.invalid", cls.password, display_name="Vendedor", role=cls.seller_role
@@ -71,7 +71,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
         response = self.login("not-an-email")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Introduzca una direcciÃ³n de correo electrÃ³nico vÃ¡lida")
+        self.assertContains(response, "Introduzca una dirección de correo electrónico válida")
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_unknown_email_wrong_password_and_inactive_account_share_message(self) -> None:
@@ -126,7 +126,7 @@ class AuthenticationAndAuthorizationTests(TestCase):
         response = self.client.get(reverse("sales-counter"))
         self.assertEqual(response.status_code, 302)
 
-    def test_login_form_renders_accessible_controls_and_labels(self):
+    def test_login_form_renders_accessible_controls_and_labels(self) -> None:
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="login-form"')
@@ -136,23 +136,17 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertContains(response, 'id="id_password"')
         self.assertContains(response, 'id="login-submit-btn"')
 
-    def test_login_error_uses_accessible_alert_and_hides_sensitive_details(self):
-        response = self.client.post(
-            reverse("login"),
-            {"email": "admin.demo@pmv.invalid", "password": "wrong-password"},
-        )
+    def test_login_error_uses_accessible_alert_and_hides_sensitive_details(self) -> None:
+        response = self.login("admin@test.invalid", "wrong-password")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="login-error-alert"')
         self.assertContains(response, 'role="alert"')
-        self.assertContains(response, "Correo o contraseÃ±a incorrectos")
+        self.assertContains(response, INVALID_CREDENTIALS_MESSAGE)
         self.assertNotContains(response, "wrong-password")
         self.assertNotContains(response, "argon2")
 
-    def test_admin_navigation_exposes_only_admin_links_and_role_attributes(self):
-        self.client.post(
-            reverse("login"),
-            {"email": "admin.demo@pmv.invalid", "password": self.password},
-        )
+    def test_admin_navigation_exposes_only_admin_links_and_role_attributes(self) -> None:
+        self.login("admin@test.invalid")
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="ADMIN"')
         self.assertContains(response, 'data-active-role="ADMIN"')
@@ -160,11 +154,8 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertNotContains(response, 'href="/inventario/carga-inicial/"')
         self.assertNotContains(response, 'href="/caja/abrir/"')
 
-    def test_almacenero_navigation_exposes_only_warehouse_links(self):
-        self.client.post(
-            reverse("login"),
-            {"email": "almacen.demo@pmv.invalid", "password": self.password},
-        )
+    def test_almacenero_navigation_exposes_only_warehouse_links(self) -> None:
+        self.login("warehouse@test.invalid")
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="ALMACENERO"')
         self.assertContains(response, 'data-active-role="ALMACENERO"')
@@ -172,11 +163,8 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertNotContains(response, 'href="/productos/nuevo/"')
         self.assertNotContains(response, 'href="/ventas/"')
 
-    def test_vendedor_navigation_exposes_only_cash_and_sales_links(self):
-        self.client.post(
-            reverse("login"),
-            {"email": "ventas.demo@pmv.invalid", "password": self.password},
-        )
+    def test_vendedor_navigation_exposes_only_cash_and_sales_links(self) -> None:
+        self.login("seller@test.invalid")
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, 'data-role="VENDEDOR"')
         self.assertContains(response, 'data-active-role="VENDEDOR"')
