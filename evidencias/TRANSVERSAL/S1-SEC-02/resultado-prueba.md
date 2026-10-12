@@ -1,8 +1,8 @@
 # Evidencia — S1-SEC-02 · SCRUM-298
 
 **Título:** Baseline de seguridad de aplicación  
-**Fecha/hora:** 2026-10-11 23:40:16 -05:00  
-**Estado recomendado:** `En progreso` — baseline implementado; falta cobertura cuando se integren todos los módulos.
+**Fecha/hora de cierre:** 2026-10-12 (America/Lima)
+**Estado recomendado:** `Finalizada`.
 
 ## Entregado
 
@@ -20,11 +20,38 @@ El chequeo de seguridad de Django en perfil demo terminó sin avisos:
 System check identified no issues (0 silenced).
 ```
 
-La suite local ejecutó casos de acceso directo prohibido y recibió `403` esperado sin mutar el conteo de cuentas. Resultado total: `8` pruebas, `OK`.
+La suite local ejecutó casos de acceso directo prohibido y recibió `403` esperado sin mutar el conteo de cuentas.
 
-## Pendiente / límite
+Se agregaron casos negativos explícitos para:
 
-No se puede cerrar como seguridad integral mientras producto, carga, caja y venta sean contratos de ruta sin sus servicios de negocio. Al integrarlos, cada operación debe conservar la autorización en vista **y** validarla de nuevo en su servicio transaccional. Falta también una prueba HTTP explícita de CSRF contra formularios de los módulos futuros.
+- Hash Argon2 y ausencia de contraseña en texto plano.
+- Rechazo de login sin token CSRF y aceptación con token válido.
+- Cookies de sesión y CSRF con `HttpOnly` y `SameSite=Lax`.
+- Rechazo de correo con formato inválido antes de autenticar.
+- Redacción de contraseñas, tokens CSRF, identificadores de sesión y cabeceras `Authorization` en formatos query, JSON y encabezados HTTP.
+- Matriz de autorización directa con respuesta `403` para roles no permitidos.
 
-**Commit sugerido:** `feat(S1-SEC-02): establecer baseline de seguridad de aplicacion`
+La prueba de correo inválido detectó que la plantilla no mostraba errores de campo;
+se corrigió `identity/templates/identity/login.html` para presentarlos.
 
+Resultado final:
+
+```text
+python manage.py test
+Found 18 test(s).
+Ran 18 tests in 1.287s
+OK
+
+python manage.py check
+System check identified no issues (0 silenced).
+
+APP_ENV=demo python manage.py check --deploy
+System check identified no issues (0 silenced).
+```
+
+## Límite del baseline
+
+La subtarea define y prueba el baseline disponible en el Sprint 1. Cuando producto,
+carga, caja y venta incorporen nuevos formularios o servicios transaccionales, sus
+propias subtareas deberán conservar este baseline y añadir pruebas negativas específicas.
+Ese trabajo futuro no invalida el baseline ya comprobado aquí.
