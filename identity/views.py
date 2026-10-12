@@ -1,9 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from django.views.decorators.http import require_GET, require_http_methods
 
 from .authorization import roles_required
 from .forms import LoginForm
@@ -16,13 +16,18 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
     form = LoginForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        result = authenticate_active_account(form.cleaned_data["email"], form.cleaned_data["password"])
-        if result.authenticated:
-            create_server_session(request, result.account)
-            return redirect("dashboard")
+    status_code = 200
+    if request.method == "POST":
+        if form.is_valid():
+            result = authenticate_active_account(
+                form.cleaned_data["email"], form.cleaned_data["password"]
+            )
+            if result.authenticated:
+                create_server_session(request, result.account)
+                return redirect("dashboard")
+        form.errors.clear()
         form.add_error(None, INVALID_CREDENTIALS_MESSAGE)
-    return render(request, "identity/login.html", {"form": form})
+    return render(request, "identity/login.html", {"form": form}, status=status_code)
 
 
 @login_required
@@ -63,4 +68,3 @@ def cash_open(request):
 @require_GET
 def sales_counter(request):
     return render(request, "identity/protected_placeholder.html", {"operation": "Ventas"})
-

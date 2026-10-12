@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from django.test import TestCase
 from django.urls import reverse
@@ -29,7 +29,20 @@ class AuthenticationAndAuthorizationTests(TestCase):
         )
 
     def login(self, email: str, password: str | None = None):
-        return self.client.post(reverse("login"), {"email": email, "password": password or self.password})
+        return self.client.post(
+            reverse("login"),
+            {"email": email, "password": self.password if password is None else password},
+        )
+
+    def test_login_form_renders_accessible_controls_and_labels(self) -> None:
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="login-form"')
+        self.assertContains(response, 'id="id_email"')
+        self.assertContains(response, 'id="id_password"')
+        self.assertContains(response, 'id="login-submit-btn"')
+        self.assertContains(response, 'autocomplete="username"')
+        self.assertContains(response, 'autocomplete="current-password"')
 
     def test_active_account_creates_server_session(self) -> None:
         response = self.login(" ADMIN@TEST.INVALID ")
@@ -42,19 +55,43 @@ class AuthenticationAndAuthorizationTests(TestCase):
             ("unknown@test.invalid", self.password),
             (self.admin.email, "incorrecta"),
             (self.inactive.email, self.password),
+            ("formato-invalido", self.password),
+            ("", ""),
         ]
         for email, password in cases:
             with self.subTest(email=email):
                 response = self.login(email, password)
                 self.assertContains(response, INVALID_CREDENTIALS_MESSAGE)
+                self.assertContains(response, 'role="alert"')
                 self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_dashboard_only_shows_authorized_navigation(self) -> None:
-        self.client.force_login(self.seller)
-        response = self.client.get(reverse("dashboard"))
-        self.assertContains(response, "Abrir turno")
-        self.assertNotContains(response, "Registrar producto")
-        self.assertNotContains(response, "Carga inicial")
+        role_expectations = [
+            (
+                self.admin,
+                ["Registrar producto"],
+                ["Carga inicial", "Abrir turno", "Ventas"],
+            ),
+            (
+                self.warehouse,
+                ["Carga inicial"],
+                ["Registrar producto", "Abrir turno", "Ventas"],
+            ),
+            (
+                self.seller,
+                ["Abrir turno", "Ventas"],
+                ["Registrar producto", "Carga inicial"],
+            ),
+        ]
+        for account, allowed_links, forbidden_links in role_expectations:
+            with self.subTest(role=account.role.code):
+                self.client.force_login(account)
+                response = self.client.get(reverse("dashboard"))
+                self.assertEqual(response.status_code, 200)
+                for text in allowed_links:
+                    self.assertContains(response, text)
+                for text in forbidden_links:
+                    self.assertNotContains(response, text)
 
     def test_direct_operation_is_denied_without_mutating_data(self) -> None:
         self.client.force_login(self.warehouse)
@@ -88,4 +125,3 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
         response = self.client.get(reverse("sales-counter"))
         self.assertEqual(response.status_code, 302)
-
