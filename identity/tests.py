@@ -125,3 +125,22 @@ class AuthenticationAndAuthorizationTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
         response = self.client.get(reverse("sales-counter"))
         self.assertEqual(response.status_code, 302)
+
+    def test_protected_routes_redirect_anonymous_users_to_login_form(self) -> None:
+        protected_routes = (
+            "dashboard",
+            "logout",
+            "product-entry",
+            "inventory-load",
+            "cash-open",
+            "sales-counter",
+        )
+        for route_name in protected_routes:
+            with self.subTest(route=route_name):
+                target_url = reverse(route_name)
+                response = self.client.get(target_url)
+                self.assertRedirects(
+                    response,
+                    f"{reverse('login')}?next={target_url}",
+                    fetch_redirect_response=True,
+                )
